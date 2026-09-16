@@ -2,6 +2,14 @@ import os
 import glob
 import markdown
 
+# --------------------------------------------------
+# アフィリエイトリンクの設定（ここに広告コードを登録）
+# --------------------------------------------------
+AFFILIATE_LINKS = {
+    "{{AFFILIATE_1}}": '<a href="https://example.com/link1" target="_blank" rel="nofollow">👉 コスパ最強のおすすめ車を見る</a>',
+    "{{AFFILIATE_2}}": '<a href="https://example.com/link2" target="_blank" rel="nofollow">👉 無料査定・見積もりはこちら</a>',
+}
+
 # 記事が入っているフォルダ
 POSTS_DIR = "posts"
 
@@ -19,6 +27,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         a:hover {{ text-decoration: underline; }}
         .header {{ margin-bottom: 30px; }}
         .card {{ border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: #fafafa; }}
+        .affiliate-box {{ background: #fffde7; border: 2px dashed #fbc02d; padding: 15px; margin: 20px 0; text-align: center; font-weight: bold; }}
     </style>
 </head>
 <body>
@@ -31,7 +40,6 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 """
 
 def generate():
-    # posts フォルダ内の .md ファイルをすべて探す
     md_files = glob.glob(f"{POSTS_DIR}/*.md")
     articles = []
 
@@ -42,10 +50,14 @@ def generate():
         with open(file_path, "r", encoding="utf-8") as f:
             text = f.read()
 
-        # MarkdownテキストをHTMLコードに変換
+        # 1. MarkdownテキストをHTMLコードに変換
         html_body = markdown.markdown(text, extensions=['fenced_code', 'tables'])
         
-        # テンプレートに流し込む
+        # 2. アフィリエイトプレースホルダーの自動置換
+        for placeholder, code in AFFILIATE_LINKS.items():
+            html_body = html_body.replace(placeholder, f'<div class="affiliate-box">{code}</div>')
+
+        # 3. テンプレートに流し込む
         full_html = HTML_TEMPLATE.format(title=title, content=html_body)
 
         # .html ファイルとして保存する
@@ -62,11 +74,10 @@ def generate():
 
     full_index = HTML_TEMPLATE.format(title="おすすめ車ガイドブログ", content=index_body)
     
-    # posts/index.html として保存
     with open(os.path.join(POSTS_DIR, "index.html"), "w", encoding="utf-8") as f:
         f.write(full_index)
 
-    print("✅ 変換成功: .html ファイルと index.html を作成しました！")
+    print("✅ 変換成功: アフィリエイトリンク置換込みで .html ファイルと index.html を作成しました！")
 
 if __name__ == "__main__":
     generate()

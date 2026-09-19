@@ -3,11 +3,41 @@ import glob
 import re
 import markdown
 
-def clean_markdown(text):
-    # AIが付ける ```markdown や ``` の囲み枠を完全除去
+def clean_content(text):
     text = re.sub(r'^```markdown\s*', '', text, flags=re.MULTILINE)
     text = re.sub(r'^```\s*$', '', text, flags=re.MULTILINE)
-    return text
+    return text.strip()
+
+def extract_title_and_body(content):
+    lines = content.splitlines()
+    title = None
+    body_lines = []
+
+    filename_pattern = re.compile(r'^#?\s*post_\d{8}_\d{6}.*', re.IGNORECASE)
+
+    for line in lines:
+        stripped = line.strip()
+        
+        # post_2026... のようなファイル名行はタイトルとして無視する
+        if not title and filename_pattern.match(stripped):
+            continue
+
+        # 最初に出てくる意味のある文字行をタイトルとして取得
+        if not title and stripped:
+            clean_title = re.sub(r'^[#\s\*=]+', '', stripped).strip()
+            clean_title = re.sub(r'[\*=]+$', '', clean_title).strip()
+            
+            if clean_title:
+                title = clean_title
+                continue
+
+        body_lines.append(line)
+
+    if not title:
+        title = "無題の記事"
+
+    body_markdown = "\n".join(body_lines)
+    return title, body_markdown
 
 def build_site():
     posts_dir = "posts"
@@ -16,6 +46,7 @@ def build_site():
 
     articles = []
 
+    print("--- 記事タイトルの抽出結果 ---")
     for filepath in md_files:
         filename = os.path.basename(filepath)
         html_filename = filename.replace(".md", ".html")
@@ -23,30 +54,10 @@ def build_site():
         with open(filepath, "r", encoding="utf-8") as f:
             content = f.read()
 
-        content = clean_markdown(content)
+        content = clean_content(content)
+        title, body_markdown = extract_title_and_body(content)
+        print(f"[{filename}] -> {title}")
 
-        lines = content.splitlines()
-        title = None
-        body_lines = []
-        
-        for line in lines:
-            line_str = line.strip()
-            if line_str.startswith("# ") and not title:
-                title = line_str.replace("# ", "").strip()
-            else:
-                body_lines.append(line)
-
-        # H1が見つからない場合は最初の文字行を使用
-        if not title:
-            for line in lines:
-                if line.strip():
-                    title = line.strip().replace("#", "").strip()
-                    break
-
-        if not title:
-            title = "無題の記事"
-
-        body_markdown = "\n".join(body_lines)
         body_html = markdown.markdown(body_markdown)
 
         page_html = f"""<!DOCTYPE html>
@@ -107,6 +118,7 @@ def build_site():
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(index_html)
 
+    print("--------------------------------")
     print("全記事の再ビルドが完了しました。")
 
 if __name__ == "__main__":

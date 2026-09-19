@@ -2,82 +2,100 @@ import os
 import glob
 import markdown
 
-# --------------------------------------------------
-# アフィリエイトリンクの設定（ここに広告コードを登録）
-# --------------------------------------------------
-AFFILIATE_LINKS = {
-    "{{AFFILIATE_1}}": '<a href="https://example.com/link1" target="_blank" rel="nofollow">👉 コスパ最強のおすすめ車を見る</a>',
-    "{{AFFILIATE_2}}": '<a href="https://example.com/link2" target="_blank" rel="nofollow">👉 無料査定・見積もりはこちら</a>',
-}
+def build_site():
+    posts_dir = "posts"
+    md_files = glob.glob(os.path.join(posts_dir, "post_*.md"))
+    md_files.sort(reverse=True)
 
-# 記事が入っているフォルダ
-POSTS_DIR = "posts"
+    articles = []
 
-# Webページの見た目の枠組み（HTMLテンプレート）
-HTML_TEMPLATE = """<!DOCTYPE html>
+    for filepath in md_files:
+        filename = os.path.basename(filepath)
+        html_filename = filename.replace(".md", ".html")
+        
+        with open(filepath, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # Markdown内の # で始まる最初の行（H1タイトル）を取得
+        lines = content.splitlines()
+        title = None
+        body_lines = []
+        
+        for line in lines:
+            if line.startswith("# ") and not title:
+                title = line.replace("# ", "").strip()
+            else:
+                body_lines.append(line)
+
+        # H1が見つからなかった場合のフォールバック
+        if not title:
+            title = "無題の記事"
+
+        # MarkdownをHTMLに変換
+        body_markdown = "\n".join(body_lines)
+        body_html = markdown.markdown(body_markdown)
+
+        # 個別記事ページHTML生成
+        page_html = f"""<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{title}</title>
     <style>
-        body {{ font-family: sans-serif; line-height: 1.8; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; }}
-        h1, h2, h3 {{ color: #2b542c; border-bottom: 1px solid #ddd; padding-bottom: 5px; }}
+        body {{ font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; }}
+        h1 {{ font-size: 1.8em; color: #111; border-bottom: 2px solid #ddd; padding-bottom: 10px; }}
         a {{ color: #0066cc; text-decoration: none; }}
         a:hover {{ text-decoration: underline; }}
-        .header {{ margin-bottom: 30px; }}
-        .card {{ border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; margin-bottom: 15px; background: #fafafa; }}
-        .affiliate-box {{ background: #fffde7; border: 2px dashed #fbc02d; padding: 15px; margin: 20px 0; text-align: center; font-weight: bold; }}
+        .back-link {{ margin-bottom: 20px; display: inline-block; }}
     </style>
 </head>
 <body>
-    <div class="header">
-        <a href="/">🏠 ブログトップへ戻る</a>
-    </div>
-    {content}
+    <a href="../index.html" class="back-link">← トップページに戻る</a>
+    <h1>{title}</h1>
+    {body_html}
 </body>
-</html>
-"""
+</html>"""
 
-def generate():
-    md_files = glob.glob(f"{POSTS_DIR}/*.md")
-    articles = []
+        with open(os.path.join(posts_dir, html_filename), "w", encoding="utf-8") as f:
+            f.write(page_html)
 
-    for file_path in md_files:
-        filename = os.path.basename(file_path)
-        title = os.path.splitext(filename)[0]
+        articles.append({
+            "title": title,
+            "url": f"posts/{html_filename}"
+        })
 
-        with open(file_path, "r", encoding="utf-8") as f:
-            text = f.read()
-
-        # 1. MarkdownテキストをHTMLコードに変換
-        html_body = markdown.markdown(text, extensions=['fenced_code', 'tables'])
-        
-        # 2. アフィリエイトプレースホルダーの自動置換
-        for placeholder, code in AFFILIATE_LINKS.items():
-            html_body = html_body.replace(placeholder, f'<div class="affiliate-box">{code}</div>')
-
-        # 3. テンプレートに流し込む
-        full_html = HTML_TEMPLATE.format(title=title, content=html_body)
-
-        # .html ファイルとして保存する
-        output_path = os.path.join(POSTS_DIR, f"{title}.html")
-        with open(output_path, "w", encoding="utf-8") as f:
-            f.write(full_html)
-        
-        articles.append((title, f"{title}.html"))
-
-    # トップページ（index.html）を作る
-    index_body = "<h1>おすすめ車ガイドブログ</h1><h2>記事一覧</h2>"
-    for title, link in articles:
-        index_body += f'<div class="card"><h3><a href="{link}">{title}</a></h3></div>'
-
-    full_index = HTML_TEMPLATE.format(title="おすすめ車ガイドブログ", content=index_body)
+    # トップページ（index.html）生成
+    list_items = "".join([f'<li><a href="{a["url"]}">{a["title"]}</a></li>' for a in articles])
     
-    with open(os.path.join(POSTS_DIR, "index.html"), "w", encoding="utf-8") as f:
-        f.write(full_index)
+    index_html = f"""<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>愛車査定・買取攻略ブログ</title>
+    <style>
+        body {{ font-family: sans-serif; line-height: 1.6; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; }}
+        h1 {{ font-size: 2em; border-bottom: 2px solid #333; padding-bottom: 10px; }}
+        ul {{ list-style-type: none; padding: 0; }}
+        li {{ margin-bottom: 15px; font-size: 1.1em; }}
+        a {{ color: #0066cc; text-decoration: none; font-weight: bold; }}
+        a:hover {{ text-decoration: underline; }}
+    </style>
+</head>
+<body>
+    <h1>愛車査定・買取攻略ブログ</h1>
+    <h2>最新の記事</h2>
+    <ul>
+        {list_items}
+    </ul>
+</body>
+</html>"""
 
-    print("✅ 変換成功: アフィリエイトリンク置換込みで .html ファイルと index.html を作成しました！")
+    with open("index.html", "w", encoding="utf-8") as f:
+        f.write(index_html)
+
+    print("サイトの再ビルドが完了しました。")
 
 if __name__ == "__main__":
-    generate()
+    build_site()

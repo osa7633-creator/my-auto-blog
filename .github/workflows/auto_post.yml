@@ -2,9 +2,11 @@ name: Auto Blog Post
 
 on:
   schedule:
-    # 毎日あさ7時（日本時間）に自動実行
     - cron: '0 22 * * *'
-  workflow_dispatch: # 手動で即座に動かすためのボタンを追加
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   build:

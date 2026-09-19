@@ -40,13 +40,12 @@ def generate_article():
 ※出力はMarkdown形式のみ（```markdown などの囲み枠は不要）にしてください。
 """
 
-    # サーバー混雑対策（503エラー時に最大3回自動再試行）
     response = None
     for attempt in range(1, 4):
         try:
             print(f"Gemini API呼び出し中... (試行 {attempt}/3)")
             response = client.models.generate_content(
-                model="gemini-2.5-flash",
+                model="gemini-3.6-flash",
                 contents=prompt
             )
             break

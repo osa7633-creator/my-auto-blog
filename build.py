@@ -4,40 +4,42 @@ import re
 import markdown
 
 def clean_content(text):
+    # ```markdown などのコードブロック装飾を除去
     text = re.sub(r'^```markdown\s*', '', text, flags=re.MULTILINE)
     text = re.sub(r'^```\s*$', '', text, flags=re.MULTILINE)
     return text.strip()
 
-def extract_title_and_body(content):
+def extract_real_title(content, filename):
     lines = content.splitlines()
-    title = None
-    body_lines = []
-
-    filename_pattern = re.compile(r'^#?\s*post_\d{8}_\d{6}.*', re.IGNORECASE)
-
+    
+    # 1. まず '# ' (H1タグ) で始まる行をすべて探す
+    h1_candidates = []
     for line in lines:
         stripped = line.strip()
+        if stripped.startswith("# "):
+            # '# ' を取り除いた純粋なタイトル文字列
+            title_text = stripped[2:].strip()
+            title_text = re.sub(r'[\*=]+$', '', title_text).strip()
+            h1_candidates.append(title_text)
+
+    # H1候補の中から 'post_' や日付数字(8桁)を含まない本物のタイトルを選ぶ
+    for cand in h1_candidates:
+        if not re.search(r'post_\d{8}', cand, re.IGNORECASE) and not re.search(r'^\d{8}_\d{6}', cand):
+            if len(cand) > 0:
+                return cand
+
+    # 2. H1タグで見つからなかった場合、全行から 'post_' や日付を含まない最もタイトルのような行を探す
+    for line in lines:
+        stripped = line.strip()
+        cleaned = re.sub(r'^[#\s\*=]+', '', stripped).strip()
+        cleaned = re.sub(r'[\*=]+$', '', cleaned).strip()
         
-        # post_2026... のようなファイル名行はタイトルとして無視する
-        if not title and filename_pattern.match(stripped):
-            continue
+        if cleaned and not re.search(r'post_\d{8}', cleaned, re.IGNORECASE) and not re.search(r'^\d{8}_\d{6}', cleaned):
+            # 日本語が含まれているか、または十分な長さがある行を採用
+            if len(cleaned) >= 5:
+                return cleaned
 
-        # 最初に出てくる意味のある文字行をタイトルとして取得
-        if not title and stripped:
-            clean_title = re.sub(r'^[#\s\*=]+', '', stripped).strip()
-            clean_title = re.sub(r'[\*=]+$', '', clean_title).strip()
-            
-            if clean_title:
-                title = clean_title
-                continue
-
-        body_lines.append(line)
-
-    if not title:
-        title = "無題の記事"
-
-    body_markdown = "\n".join(body_lines)
-    return title, body_markdown
+    return "無題の記事"
 
 def build_site():
     posts_dir = "posts"
@@ -46,7 +48,10 @@ def build_site():
 
     articles = []
 
-    print("--- 記事タイトルの抽出結果 ---")
+    print("========================================")
+    print(" 記事タイトルの抽出チェック結果")
+    print("========================================")
+
     for filepath in md_files:
         filename = os.path.basename(filepath)
         html_filename = filename.replace(".md", ".html")
@@ -55,9 +60,15 @@ def build_site():
             content = f.read()
 
         content = clean_content(content)
-        title, body_markdown = extract_title_and_body(content)
-        print(f"[{filename}] -> {title}")
+        title = extract_real_title(content, filename)
+        
+        print(f"ファイル名: {filename}")
+        print(f"抽出タイトル: {title}")
+        print("-" * 40)
 
+        # 本文用のMarkdown（H1タイトル重複防止のため、抽出タイトル行を除外してHTML化）
+        body_lines = [l for l in content.splitlines() if title not in l and not re.search(r'post_\d{8}', l, re.IGNORECASE)]
+        body_markdown = "\n".join(body_lines)
         body_html = markdown.markdown(body_markdown)
 
         page_html = f"""<!DOCTYPE html>
@@ -118,8 +129,7 @@ def build_site():
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(index_html)
 
-    print("--------------------------------")
-    print("全記事の再ビルドが完了しました。")
+    print("全記事およびindex.htmlの再構築が完了しました。")
 
 if __name__ == "__main__":
     build_site()

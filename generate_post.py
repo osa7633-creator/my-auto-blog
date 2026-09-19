@@ -1,9 +1,9 @@
 import os
 import random
+import time
 from datetime import datetime
 from google import genai
 
-# 車関連の自動生成テーマリスト
 TOPICS = [
     "中古車を高値で売るコツとおすすめの一括査定サービス",
     "車の買い替えで損しないための最適なタイミング",
@@ -21,8 +21,6 @@ def generate_article():
         raise ValueError("GEMINI_API_KEY が設定されていません。")
 
     client = genai.Client(api_key=api_key)
-
-    # ランダムにテーマを選択
     topic = random.choice(TOPICS)
     print(f"今回の選択テーマ: {topic}")
 
@@ -42,12 +40,24 @@ def generate_article():
 ※出力はMarkdown形式のみ（```markdown などの囲み枠は不要）にしてください。
 """
 
-    response = client.models.generate_content(
-        model="gemini-3.6-flash",
-        contents=prompt
-    )
+    # サーバー混雑対策（503エラー時に最大3回自動再試行）
+    response = None
+    for attempt in range(1, 4):
+        try:
+            print(f"Gemini API呼び出し中... (試行 {attempt}/3)")
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt
+            )
+            break
+        except Exception as e:
+            print(f"一時的なエラーが発生しました: {e}")
+            if attempt < 3:
+                print("10秒間待機して自動再試行します...")
+                time.sleep(10)
+            else:
+                raise e
 
-    # 保存用ファイル名の作成
     now = datetime.now().strftime("%Y%m%d_%H%M%S")
     os.makedirs("posts", exist_ok=True)
     filename = f"posts/post_{now}.md"

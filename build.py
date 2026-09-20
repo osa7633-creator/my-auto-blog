@@ -3,32 +3,53 @@ import glob
 import re
 import markdown
 
-def clean_content(text):
-    text = re.sub(r'^```markdown\s*', '', text, flags=re.MULTILINE)
-    text = re.sub(r'^```\s*$', '', text, flags=re.MULTILINE)
-    return text.strip()
+def fix_and_clean_md(filepath):
+    """ Markdownファイル内の先頭ゴミ文字列を直接除去して綺麗にする """
+    with open(filepath, "r", encoding="utf-8") as f:
+        content = f.read()
 
-def extract_real_title(content, filename):
+    # コードブロック装飾の除去
+    content = re.sub(r'^```markdown\s*', '', content, flags=re.MULTILINE)
+    content = re.sub(r'^```\s*$', '', content, flags=re.MULTILINE)
+
+    lines = content.splitlines()
+    cleaned_lines = []
+    
+    for line in lines:
+        stripped = line.strip()
+        # ファイル名IDや単発の不要な文字列を削除
+        if re.search(r'post_\d{8}_\d{6}', stripped, re.IGNORECASE):
+            continue
+        if stripped in ["レビューは", "選び方_公式"]:
+            continue
+        cleaned_lines.append(line)
+
+    cleaned_content = "\n".join(cleaned_lines).strip()
+
+    # 掃除した内容でMarkdownファイルを直接上書き保存
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write(cleaned_content)
+
+    return cleaned_content
+
+def extract_title(content):
     lines = content.splitlines()
     
-    # 1. '# ' (H1) から post_ や日付以外の純粋なタイトルを探す
+    # 1. '# ' (H1) から日本語のまともなタイトルを探す
     for line in lines:
         stripped = line.strip()
         if stripped.startswith("# "):
-            title_text = stripped[2:].strip()
-            title_text = re.sub(r'[\*=]+$', '', title_text).strip()
-            if title_text and not re.search(r'post_\d{8}', title_text, re.IGNORECASE) and not re.search(r'^\d{8}_\d{6}', title_text):
-                return title_text
+            title = stripped[2:].strip()
+            title = re.sub(r'[\*=]+$', '', title).strip()
+            if title and len(title) > 3 and not re.search(r'post_\d{8}', title):
+                return title
 
-    # 2. H1で見つからない場合、本文全体から一番それっぽい行を探す
+    # 2. 見つからない場合、本文中で一番長い文章行を取得
     for line in lines:
         stripped = line.strip()
         cleaned = re.sub(r'^[#\s\*=]+', '', stripped).strip()
-        cleaned = re.sub(r'[\*=]+$', '', cleaned).strip()
-        
-        if cleaned and not re.search(r'post_\d{8}', cleaned, re.IGNORECASE) and not re.search(r'^\d{8}_\d{6}', cleaned):
-            if len(cleaned) >= 5 and "ブログ" not in cleaned and "トップ" not in cleaned:
-                return cleaned
+        if len(cleaned) >= 10 and not re.search(r'post_\d{8}', cleaned):
+            return cleaned
 
     return "無題の記事"
 
@@ -39,20 +60,24 @@ def build_site():
 
     articles = []
 
+    print("=== 全記事のクレンジング & 再構築 ===")
     for filepath in md_files:
         filename = os.path.basename(filepath)
         html_filename = filename.replace(".md", ".html")
         
-        with open(filepath, "r", encoding="utf-8") as f:
-            content = f.read()
+        # 1. mdファイル自体のゴミ清掃
+        content = fix_and_clean_md(filepath)
+        
+        # 2. タイトル抽出
+        title = extract_title(content)
+        print(f"[{filename}] -> {title}")
 
-        content = clean_content(content)
-        title = extract_real_title(content, filename)
-
-        body_lines = [l for l in content.splitlines() if title not in l and not re.search(r'post_\d{8}', l, re.IGNORECASE)]
+        # 3. 本文HTML作成 (タイトル行の重複を排除)
+        body_lines = [l for l in content.splitlines() if title not in l]
         body_markdown = "\n".join(body_lines)
         body_html = markdown.markdown(body_markdown)
 
+        # 個別記事HTML
         page_html = f"""<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -84,6 +109,7 @@ def build_site():
             "url": f"posts/{html_filename}"
         })
 
+    # カード型トップページHTML
     cards_html = ""
     for a in articles:
         cards_html += f"""
@@ -125,7 +151,7 @@ def build_site():
     with open("index.html", "w", encoding="utf-8") as f:
         f.write(index_html)
 
-    print("全記事の再構築が完了しました。")
+    print("処理が正常終了しました。")
 
 if __name__ == "__main__":
     build_site()

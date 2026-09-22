@@ -13,8 +13,8 @@ TOPICS = [
     "車の買い替えで10万円以上得する最適なタイミング5選"
 ]
 
-# 確実に存在する安定モデルのみ指定
-MODELS = ["gemini-2.0-flash", "gemini-1.5-flash"]
+# 最新の推奨標準モデルを指定
+MODELS = ["gemini-3.6-flash"]
 
 def clean_markdown(text):
     text = re.sub(r"^```markdown\s*", "", text, flags=re.MULTILINE)
@@ -47,7 +47,7 @@ def generate_article():
 
     for model_name in MODELS:
         print(f"使用モデル: {model_name}")
-        for attempt in range(1, 4):
+        for attempt in range(1, 5):
             try:
                 response = client.models.generate_content(
                     model=model_name,
@@ -58,8 +58,8 @@ def generate_article():
                     print(f"成功: {model_name}")
                     break
             except Exception as e:
-                print(f"エラー ({model_name} リトライ {attempt}/3): {e}")
-                time.sleep(10 * attempt)
+                print(f"エラー ({model_name} リトライ {attempt}/4): {e}")
+                time.sleep(15 * attempt)
         
         if article_content:
             break

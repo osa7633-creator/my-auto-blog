@@ -50,7 +50,7 @@ def generate_article():
             print(f"Gemini API呼び出し中... (試行 {attempt}/{max_retries})")
             
             response = client.models.generate_content(
-                model="gemini-2.5-flash",
+                model="gemini-3.6-flash",
                 contents=prompt
             )
 

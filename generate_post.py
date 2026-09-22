@@ -13,8 +13,7 @@ TOPICS = [
     "車の買い替えで10万円以上得する最適なタイミング5選"
 ]
 
-# 最新の推奨標準モデルを指定
-MODELS = ["gemini-3.6-flash"]
+MODEL_NAME = "gemini-3.6-flash"
 
 def clean_markdown(text):
     text = re.sub(r"^```markdown\s*", "", text, flags=re.MULTILINE)
@@ -43,29 +42,34 @@ def generate_article():
 4. マークダウン文章のみを出力してください（``` などのコード囲みは含めないでください）。
 """
 
+    max_retries = 3
     article_content = None
 
-    for model_name in MODELS:
-        print(f"使用モデル: {model_name}")
-        for attempt in range(1, 5):
-            try:
-                response = client.models.generate_content(
-                    model=model_name,
-                    contents=prompt
-                )
-                if response and response.text:
-                    article_content = clean_markdown(response.text)
-                    print(f"成功: {model_name}")
-                    break
-            except Exception as e:
-                print(f"エラー ({model_name} リトライ {attempt}/4): {e}")
+    for attempt in range(1, max_retries + 1):
+        try:
+            print(f"Gemini API呼び出し中... ({MODEL_NAME} / 試行 {attempt}/{max_retries})")
+            response = client.models.generate_content(
+                model=MODEL_NAME,
+                contents=prompt
+            )
+            if response and response.text:
+                article_content = clean_markdown(response.text)
+                print("記事の生成に成功しました！")
+                break
+
+        except Exception as e:
+            err_msg = str(e)
+            # 429 (1日上限到達) の場合はリトライせず即時終了する
+            if "429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg:
+                print(f"【通知】{MODEL_NAME} の1日あたりの無料利用上限（20回）に達しました。本日の自動生成をスキップします。")
+                return
+
+            print(f"一時的なエラー (試行 {attempt}/{max_retries}): {err_msg}")
+            if attempt < max_retries:
                 time.sleep(15 * attempt)
-        
-        if article_content:
-            break
 
     if not article_content:
-        raise RuntimeError("全モデルで生成失敗")
+        raise RuntimeError("記事の取得に失敗しました。")
 
     os.makedirs("posts", exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")

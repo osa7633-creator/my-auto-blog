@@ -1,4 +1,5 @@
 import os
+import re
 import random
 import time
 from datetime import datetime
@@ -6,65 +7,79 @@ from google import genai
 
 TOPICS = [
     "中古車を高値で売るコツとおすすめの一括査定サービス",
-    "車の買い替えで損しないための最適なタイミング",
-    "ディーラー下取りと車買取専門店の買取額の違いとメリット",
     "動かない車や古い事故車でも高く買い取ってもらう方法",
-    "車査定でのしつこい営業電話を回避してスマートに売る方法",
-    "軽自動車の買取相場と査定額をアップさせるチェックポイント",
-    "走行距離10万キロ超えの車でも高く売るための注意点",
-    "愛車を手放す時の必要書類とスムーズな手続きの流れ",
+    "【2026年最新】軽自動車の買取相場と査定額をアップさせるコツ",
+    "走行距離10万キロ超えでも諦めない！愛車を高く売る完全攻略ガイド",
+    "車の買い替えで10万円以上得する最適なタイミング5選"
 ]
+
+def clean_markdown(text):
+    text = re.sub(r"^```markdown\s*", "", text, flags=re.MULTILINE)
+    text = re.sub(r"^```\s*", "", text, flags=re.MULTILINE)
+    return text.strip()
 
 def generate_article():
     api_key = os.environ.get("GEMINI_API_KEY")
     if not api_key:
-        raise ValueError("GEMINI_API_KEY が設定されていません。")
+        raise ValueError("環境変数 GEMINI_API_KEY が設定されていません。")
 
     client = genai.Client(api_key=api_key)
     topic = random.choice(TOPICS)
-    print(f"今回の選択テーマ: {topic}")
+    print(f"--- 今回の選択テーマ: {topic} ---")
 
     prompt = f"""
-あなたは車買取・査定に詳しいプロのブロガーです。
-以下のテーマについて、読者の悩みを解決するSEOに強いブログ記事を日本語で作成してください。
+あなたは自動車買取・査定のプロブロガーです。
+以下のテーマについて、読者にとって非常に役立つブログ記事（Markdown形式）を執筆してください。
 
-【テーマ】: {topic}
+テーマ: {topic}
 
-【構成の指定】:
-- H1タイトル（魅力的でクリックしたくなるタイトル）
-- 導入文（読者の共感を呼び、記事を読むメリットを伝える）
-- H2見出し 3〜4つ（読みやすい解説、具体的なアドバイス）
-- まとめ（読者の背中を押す文面、査定申込みを促す文言）
-
-※アフィリエイト広告を入れるためのタグ「{{AFFILIATE_1}}」を、導入文の直後とまとめの直前に1つずつ配置してください。
-※出力はMarkdown形式のみ（```markdown などの囲み枠は不要）にしてください。
+制約事項:
+1. 記事の1行目は必ず `# タイトル` の形式（H1タグ）にしてください。
+2. 構成: はじめに、車を高く売るポイント、おすすめの対策、まとめ。
+3. 読者が納得して一括査定などのサービスを使いたくなるような、親しみやすく丁寧な解説を行ってください。
+4. マークダウン文章のみを出力してください（``` などのコード囲みは含めないでください）。
 """
 
-    response = None
-    for attempt in range(1, 4):
+    max_retries = 5
+    base_delay = 15
+
+    article_content = None
+
+    for attempt in range(1, max_retries + 1):
         try:
-            print(f"Gemini API呼び出し中... (試行 {attempt}/3)")
+            print(f"Gemini API呼び出し中... (試行 {attempt}/{max_retries})")
+            
             response = client.models.generate_content(
-                model="gemini-3.6-flash",
+                model="gemini-2.5-flash",
                 contents=prompt
             )
-            break
+
+            if response and response.text:
+                article_content = clean_markdown(response.text)
+                print("記事の生成に成功しました！")
+                break
+
         except Exception as e:
             print(f"一時的なエラーが発生しました: {e}")
-            if attempt < 3:
-                print("10秒間待機して自動再試行します...")
-                time.sleep(10)
-            else:
+            if attempt == max_retries:
+                print("エラー: 最大リトライ回数に達したため処理を中断します。")
                 raise e
 
-    now = datetime.now().strftime("%Y%m%d_%H%M%S")
+            delay = base_delay * (2 ** (attempt - 1))
+            print(f"{delay}秒間待機して再試行します...")
+            time.sleep(delay)
+
+    if not article_content:
+        raise RuntimeError("記事本文を取得できませんでした。")
+
     os.makedirs("posts", exist_ok=True)
-    filename = f"posts/post_{now}.md"
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filepath = f"posts/post_{timestamp}.md"
 
-    with open(filename, "w", encoding="utf-8") as f:
-        f.write(response.text)
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write(article_content)
 
-    print(f"記事を生成しました: {filename}")
+    print(f"ファイル保存完了: {filepath}")
 
 if __name__ == "__main__":
     generate_article()

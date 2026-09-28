@@ -1,84 +1,102 @@
 import os
-import re
+import glob
 import random
 import time
 from datetime import datetime
 from google import genai
 
-TOPICS = [
-    "中古車を高値で売るコツとおすすめの一括査定サービス",
-    "動かない車や古い事故車でも高く買い取ってもらう方法",
-    "【2026年最新】軽自動車の買取相場と査定額をアップさせるコツ",
-    "走行距離10万キロ超えでも諦めない！愛車を高く売る完全攻略ガイド",
-    "車の買い替えで10万円以上得する最適なタイミング5選"
+api_key = os.environ.get("GEMINI_API_KEY")
+if not api_key:
+    print("Error: GEMINI_API_KEY is not set.")
+    exit(1)
+
+client = genai.Client(api_key=api_key)
+
+# 1. 過去記事の取得（重複防止）
+existing_files = glob.glob("posts/*.md")
+past_titles = [os.path.basename(f).replace(".md", "") for f in existing_files]
+past_titles_str = "\n".join(past_titles[-20:]) if past_titles else "なし"
+
+# 2. テーマを大幅に多角化（車系案件の審査対策を強化）
+themes = [
+    # 車・買取り・処分（A8審査対策）
+    "中古車を高く売るための相見積もりのコツとタイミング",
+    "動かない車・年式が古い車を処分・買取してもらう方法",
+    "車検を通すか買い替えるか？損しない判断基準",
+    "一括査定サービスのメリット・デメリットと電話ラッシュ対策",
+    "車の売却時に必要な書類と手続きの流れ解説",
+    
+    # ガジェット・デスク環境
+    "リモートワークの生産性を劇的に上げるおすすめガジェット5選",
+    "デュアルモニター環境の構築方法と作業効率の変化",
+    "疲れないオフィスチェア・昇降デスクの選び方",
+    
+    # AI・プログラミング・自動化
+    "ChatGPT・Geminiを日常業務で使い倒すプロンプト例",
+    "Pythonを使った日常の単純作業自動化アイデア",
+    "個人開発者が知っておくべき無料インフラ・ホスティングサービス",
+    
+    # 資産形成・節約・キャリア
+    "固定費削減！真っ先に見直すべきサブスクと通信費",
+    "副業ブログで最初の1万円を稼ぐためのステップ",
+    "時間を作るための『やらないことリスト』の作成手順"
 ]
 
-MODEL_NAME = "gemini-3.6-flash"
+selected_theme = random.choice(themes)
 
-def clean_markdown(text):
-    text = re.sub(r"^```markdown\s*", "", text, flags=re.MULTILINE)
-    text = re.sub(r"^```\s*", "", text, flags=re.MULTILINE)
-    return text.strip()
+prompt = f"""
+あなたはプロのWebライターです。
+以下の【指定テーマ】について、読者の疑問や悩みを解決する高品質なブログ記事を1本作成してください。
 
-def generate_article():
-    api_key = os.environ.get("GEMINI_API_KEY")
-    if not api_key:
-        raise ValueError("環境変数 GEMINI_API_KEY が設定されていません。")
+【指定テーマ】: {selected_theme}
 
-    client = genai.Client(api_key=api_key)
-    topic = random.choice(TOPICS)
-    print(f"--- 選択テーマ: {topic} ---")
+【厳守事項・重複禁止】
+以下の過去記事タイトルとは内容や切り口が「絶対に被らない」ように執筆してください。
+--- 過去に投稿済みの記事一覧 ---
+{past_titles_str}
+--------------------------------
 
-    prompt = f"""
-あなたは自動車買取・査定のプロブロガーです。
-以下のテーマについて、読者にとって非常に役立つブログ記事（Markdown形式）を執筆してください。
+【文章構成】
+- タイトル（# タイトル）
+- 導入（読者の悩みに共感し、記事で得られるメリットを提示）
+- 本文（H2, H3見出しを使い、具体的な手順や理由を分かりやすく解説）
+- まとめ
 
-テーマ: {topic}
-
-制約事項:
-1. 記事の1行目は必ず `# タイトル` の形式（H1タグ）にしてください。
-2. 構成: はじめに、車を高く売るポイント、おすすめの対策、まとめ。
-3. 読者が納得して一括査定などのサービスを使いたくなるような、親しみやすく丁寧な解説を行ってください。
-4. マークダウン文章のみを出力してください（``` などのコード囲みは含めないでください）。
+Markdown形式で出力し、コードブロック（```markdown 等）で囲まずに直接出力してください。
 """
 
-    max_retries = 3
-    article_content = None
+max_retries = 3
+for attempt in range(1, max_retries + 1):
+    try:
+        print(f"記事生成中... テーマ: {selected_theme}")
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+        )
+        
+        content = response.text.strip()
+        if content.startswith("```"):
+            lines = content.splitlines()
+            if lines[0].startswith("```"):
+                lines = lines[1:]
+            if lines and lines[-1].startswith("```"):
+                lines = lines[:-1]
+            content = "\n".join(lines).strip()
 
-    for attempt in range(1, max_retries + 1):
-        try:
-            print(f"Gemini API呼び出し中... ({MODEL_NAME} / 試行 {attempt}/{max_retries})")
-            response = client.models.generate_content(
-                model=MODEL_NAME,
-                contents=prompt
-            )
-            if response and response.text:
-                article_content = clean_markdown(response.text)
-                print("記事の生成に成功しました！")
-                break
+        now = datetime.now()
+        filename = f"posts/{now.strftime('%Y-%m-%d-%H%M%S')}.md"
+        os.makedirs("posts", exist_ok=True)
+        
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(content)
+            
+        print(f"Successfully generated: {filename}")
+        break
 
-        except Exception as e:
-            err_msg = str(e)
-            # 429 (1日上限到達) の場合はリトライせず即時終了する
-            if "429" in err_msg or "RESOURCE_EXHAUSTED" in err_msg:
-                print(f"【通知】{MODEL_NAME} の1日あたりの無料利用上限（20回）に達しました。本日の自動生成をスキップします。")
-                return
-
-            print(f"一時的なエラー (試行 {attempt}/{max_retries}): {err_msg}")
-            if attempt < max_retries:
-                time.sleep(15 * attempt)
-
-    if not article_content:
-        raise RuntimeError("記事の取得に失敗しました。")
-
-    os.makedirs("posts", exist_ok=True)
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    filepath = f"posts/post_{timestamp}.md"
-
-    with open(filepath, "w", encoding="utf-8") as f:
-        f.write(article_content)
-
-    print(f"保存完了: {filepath}")
-
-if __name__ == "__main__":
-    generate_article()
+    except Exception as e:
+        print(f"一時的エラー (試行 {attempt}/{max_retries}): {e}")
+        if attempt < max_retries:
+            time.sleep(10)
+        else:
+            print("混雑のため本日の生成をスキップします。")
+            exit(0)

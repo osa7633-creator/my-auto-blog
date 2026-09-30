@@ -6,6 +6,7 @@ import markdown
 os.makedirs("posts", exist_ok=True)
 md_files = glob.glob("posts/*.md")
 
+SITE_URL = "https://my-auto-blog.pages.dev"
 AFFILIATE_URL = "https://px.a8.net/svt/ejp?a8mat=4BCNG8+BMJR1U+4JVQ+5YZ77"
 
 def make_button_box(title_text="頭金0円・月々定額で人気の新車に乗れる！"):
@@ -89,9 +90,7 @@ for file_path in md_files:
             title = line.replace("# ", "").strip()
             break
 
-    # 見出し内の不要なタグを除去
     clean_text = re.sub(r'(#+)\s*\[AFFILIATE_LINK_\d+\]\s*:?\s*', r'\1 ', clean_text)
-
     html_content = markdown.markdown(clean_text, extensions=['fenced_code', 'tables'])
 
     has_button = False
@@ -101,7 +100,6 @@ for file_path in md_files:
             html_content = html_content.replace(tag, make_button_box())
             has_button = True
 
-    # 記事ページ（about以外）なら確実にボタンを挿入
     if filename != "about":
         if not has_button:
             if "</h2>" in html_content:
@@ -109,8 +107,6 @@ for file_path in md_files:
                 html_content = parts[0] + "</h2>\n" + make_button_box("おすすめの新車カーリース") + parts[1]
             else:
                 html_content = make_button_box("おすすめの新車カーリース") + html_content
-
-        # 記事末尾にもボタンを追加（成約率向上）
         html_content += make_button_box("頭金なし・月々定額で乗れる【オリコで乗ーる】")
 
     if filename.startswith("post_") and len(filename) >= 13:
@@ -125,7 +121,6 @@ for file_path in md_files:
         posts_data.append({"title": title, "filename": f"{filename}.html", "date": date_str, "raw_filename": filename})
 
     article_html = f"{HTML_HEAD.replace('{{TITLE}}', title)}\n<a href='/' class='back-link'>&larr; 記事一覧へ戻る</a>\n<div class='article-container'>\n{html_content}\n</div>\n{HTML_FOOT}"
-
     with open(f"{filename}.html", "w", encoding="utf-8") as f:
         f.write(article_html)
 
@@ -137,4 +132,18 @@ index_html = f"{HTML_HEAD.replace('{{TITLE}}', 'Auto Tech Blog')}\n{index_body}\
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(index_html)
 
-print("Build completed successfully with guaranteed affiliate buttons.")
+# sitemap.xml の生成
+sitemap_urls = [f"<url><loc>{SITE_URL}/</loc><priority>1.0</priority></url>", f"<url><loc>{SITE_URL}/about.html</loc><priority>0.5</priority></url>"]
+for p in posts_data:
+    sitemap_urls.append(f"<url><loc>{SITE_URL}/{p['filename']}</loc><priority>0.8</priority></url>")
+
+sitemap_xml = f'<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + "\n".join(sitemap_urls) + '\n</urlset>'
+with open("sitemap.xml", "w", encoding="utf-8") as f:
+    f.write(sitemap_xml)
+
+# robots.txt の生成
+robots_txt = f"User-agent: *\nAllow: /\nSitemap: {SITE_URL}/sitemap.xml\n"
+with open("robots.txt", "w", encoding="utf-8") as f:
+    f.write(robots_txt)
+
+print("Build completed with sitemap.xml and robots.txt.")

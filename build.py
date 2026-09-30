@@ -1,7 +1,7 @@
 import os
 import glob
+import re
 import markdown
-from datetime import datetime
 
 os.makedirs("posts", exist_ok=True)
 md_files = glob.glob("posts/*.md")
@@ -195,19 +195,35 @@ for file_path in md_files:
     with open(file_path, "r", encoding="utf-8") as f:
         md_text = f.read()
 
-    html_body = markdown.markdown(md_text, extensions=['fenced_code', 'tables'])
-    
-    lines = md_text.splitlines()
+    # Front Matter (--- で囲まれたメタデータ) を除去
+    clean_text = md_text
+    if clean_text.startswith("---"):
+        parts = clean_text.split("---", 2)
+        if len(parts) >= 3:
+            clean_text = parts[2].strip()
+
+    # 未置換プレースホルダーのクリーンアップ
+    clean_text = re.sub(r'\[AFFILIATE_LINK_\d+\]', '', clean_text)
+
+    # タイトル抽出 (# 見出し)
+    lines = clean_text.splitlines()
     title = filename
     for line in lines:
         if line.startswith("# "):
             title = line.replace("# ", "").strip()
             break
 
-    try:
-        date_str = filename[:10]
-    except:
-        date_str = "Latest"
+    # 日付抽出 (post_YYYYMMDD_... から判定)
+    if filename.startswith("post_") and len(filename) >= 13:
+        date_raw = filename.split("_")[1]
+        if len(date_raw) >= 8:
+            date_str = f"{date_raw[:4]}-{date_raw[4:6]}-{date_raw[6:8]}"
+        else:
+            date_str = "最新記事"
+    else:
+        date_str = "最新記事"
+
+    html_body = markdown.markdown(clean_text, extensions=['fenced_code', 'tables'])
 
     posts_data.append({
         "title": title,

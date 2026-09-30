@@ -15,223 +15,53 @@
             --border: #e2e8f0;
             --max-width: 800px;
         }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            line-height: 1.75;
-            padding: 20px;
-        }
-
-        header {
-            max-width: var(--max-width);
-            margin: 40px auto 30px;
-            text-align: center;
-        }
-
-        header a {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: var(--text-main);
-            text-decoration: none;
-            letter-spacing: -0.025em;
-        }
-
-        header a:hover {
-            color: var(--primary);
-        }
-
-        main {
-            max-width: var(--max-width);
-            margin: 0 auto 60px;
-        }
-
-        /* 記事一覧（カード型） */
-        .post-grid {
-            display: grid;
-            gap: 20px;
-        }
-
-        .post-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 24px;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            text-decoration: none;
-            color: inherit;
-            display: block;
-        }
-
-        .post-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
-            border-color: var(--primary);
-        }
-
-        .post-date {
-            font-size: 0.85rem;
-            color: var(--text-sub);
-            margin-bottom: 8px;
-            display: block;
-        }
-
-        .post-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            line-height: 1.4;
-            color: var(--text-main);
-        }
-
-        /* 記事本文 */
-        .article-container {
-            background: var(--card-bg);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 32px;
-        }
-
-        .article-container h1 {
-            font-size: 1.8rem;
-            margin-bottom: 24px;
-            line-height: 1.3;
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 16px;
-        }
-
-        .article-container h2 {
-            font-size: 1.4rem;
-            margin: 32px 0 16px;
-            padding-left: 12px;
-            border-left: 4px solid var(--primary);
-        }
-
-        .article-container h3 {
-            font-size: 1.15rem;
-            margin: 24px 0 12px;
-        }
-
-        .article-container p {
-            margin-bottom: 20px;
-            word-break: break-word;
-        }
-
-        .article-container ul, .article-container ol {
-            margin: 0 0 20px 24px;
-        }
-
-        .article-container li {
-            margin-bottom: 6px;
-        }
-
-        .article-container blockquote {
-            background: var(--bg-color);
-            border-left: 4px solid var(--text-sub);
-            padding: 12px 16px;
-            margin-bottom: 20px;
-            color: var(--text-sub);
-            font-style: italic;
-        }
-
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 600;
-        }
-
-        .back-link:hover {
-            text-decoration: underline;
-        }
-
-        footer {
-            max-width: var(--max-width);
-            margin: 0 auto;
-            text-align: center;
-            font-size: 0.85rem;
-            color: var(--text-sub);
-            padding: 20px 0;
-            border-top: 1px solid var(--border);
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: var(--bg-color); color: var(--text-main); line-height: 1.75; padding: 20px; }
+        header { max-width: var(--max-width); margin: 40px auto 30px; text-align: center; }
+        header a { font-size: 1.8rem; font-weight: 800; color: var(--text-main); text-decoration: none; letter-spacing: -0.025em; }
+        header a:hover { color: var(--primary); }
+        main { max-width: var(--max-width); margin: 0 auto 60px; }
+        .post-grid { display: grid; gap: 20px; }
+        .post-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 24px; transition: transform 0.2s ease, box-shadow 0.2s ease; text-decoration: none; color: inherit; display: block; }
+        .post-card:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05); border-color: var(--primary); }
+        .post-date { font-size: 0.85rem; color: var(--text-sub); margin-bottom: 8px; display: block; }
+        .post-title { font-size: 1.25rem; font-weight: 700; line-height: 1.4; color: var(--text-main); }
+        .article-container { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 32px; }
+        .article-container h1 { font-size: 1.8rem; margin-bottom: 24px; line-height: 1.3; border-bottom: 2px solid var(--border); padding-bottom: 16px; }
+        .article-container h2 { font-size: 1.4rem; margin: 32px 0 16px; padding-left: 12px; border-left: 4px solid var(--primary); }
+        .article-container h3 { font-size: 1.15rem; margin: 24px 0 12px; }
+        .article-container p { margin-bottom: 20px; word-break: break-word; }
+        .article-container ul, .article-container ol { margin: 0 0 20px 24px; }
+        .article-container li { margin-bottom: 6px; }
+        .article-container blockquote { background: var(--bg-color); border-left: 4px solid var(--text-sub); padding: 12px 16px; margin-bottom: 20px; color: var(--text-sub); font-style: italic; }
+        .back-link { display: inline-block; margin-bottom: 20px; color: var(--primary); text-decoration: none; font-weight: 600; }
+        .back-link:hover { text-decoration: underline; }
+        footer { max-width: var(--max-width); margin: 0 auto; text-align: center; font-size: 0.85rem; color: var(--text-sub); padding: 20px 0; border-top: 1px solid var(--border); }
     </style>
 </head>
 <body>
-    <header>
-        <a href="/">Auto Tech Blog</a>
-    </header>
+    <header><a href="/">Auto Tech Blog</a></header>
     <main>
 
 <div class="post-grid">
-  <a href="post_20260928_005346.html" class="post-card">
-    <span class="post-date">2026-09-28</span>
-    <div class="post-title">【プロが直伝】車の買い替えで10万円以上得する！最適なタイミング5選と失敗しない売却術</div>
-  </a>
-  <a href="post_20260927_005219.html" class="post-card">
-    <span class="post-date">2026-09-27</span>
-    <div class="post-title">【諦めないで！】動かない車や古い事故車を最高値で買い取ってもらう攻略法</div>
-  </a>
-  <a href="post_20260926_005112.html" class="post-card">
-    <span class="post-date">2026-09-26</span>
-    <div class="post-title">【2026年最新】軽自動車の買取相場と査定額をアップさせるコツ</div>
-  </a>
-  <a href="post_20260925_005115.html" class="post-card">
-    <span class="post-date">2026-09-25</span>
-    <div class="post-title">【プロが教える】愛車を最高額で売るコツと失敗しないおすすめ一括査定サービス</div>
-  </a>
-  <a href="post_20260924_032720.html" class="post-card">
-    <span class="post-date">2026-09-24</span>
-    <div class="post-title">【諦めないで！】動かない車や古い事故車を限界まで高く買い取ってもらう完全ガイド</div>
-  </a>
-  <a href="post_20260924_031120.html" class="post-card">
-    <span class="post-date">2026-09-24</span>
-    <div class="post-title">走行距離10万キロ超えでも諦めない！愛車を高く売る完全攻略ガイド</div>
-  </a>
-  <a href="post_20260924_025738.html" class="post-card">
-    <span class="post-date">2026-09-24</span>
-    <div class="post-title">【あきらめないで！】動かない車や古い事故車でも高く買い取ってもらう方法</div>
-  </a>
-  <a href="post_20260922_221329.html" class="post-card">
-    <span class="post-date">2026-09-22</span>
-    <div class="post-title">【プロが教える】車の買い替えで10万円以上得する最適なタイミング5選</div>
-  </a>
-  <a href="post_20260922_004711.html" class="post-card">
-    <span class="post-date">2026-09-22</span>
-    <div class="post-title">車査定のしつこい営業電話は回避できる！電話なし・スマートに愛車を高く売る裏ワザと対処法</div>
-  </a>
-  <a href="post_20260920_221307.html" class="post-card">
-    <span class="post-date">2026-09-20</span>
-    <div class="post-title">【2024年最新】軽自動車の買取相場と査定額を10万円アップさせる7つの裏ワザ</div>
-  </a>
-  <a href="post_20260919_221247.html" class="post-card">
-    <span class="post-date">2026-09-19</span>
-    <div class="post-title">走行距離10万キロ超えでも諦めない！愛車を1円でも高く売るための完全攻略ガイド</div>
-  </a>
-  <a href="post_20260919_141513.html" class="post-card">
-    <span class="post-date">2026-09-19</span>
-    <div class="post-title">【知らなきゃ損】車の買い替えで10万円以上得する最適なタイミング5選！愛車を最高値で売るコツもプロが伝授</div>
-  </a>
-  <a href="about.html" class="post-card">
-    <span class="post-date">最新記事</span>
-    <div class="post-title">運営者情報・プライバシーポリシー</div>
-  </a>
-  <a href="2024年最新初心者におすすめの軽自動車3選失敗しない選び方のポイントも解説.html" class="post-card">
-    <span class="post-date">最新記事</span>
-    <div class="post-title">【2024年最新】初心者におすすめの軽自動車3選！失敗しない選び方のポイントも解説</div>
-  </a>
+  <a href="post_20260928_005346.html" class="post-card"><span class="post-date">2026-09-28</span><div class="post-title">【プロが直伝】車の買い替えで10万円以上得する！最適なタイミング5選と失敗しない売却術</div></a>
+  <a href="post_20260927_005219.html" class="post-card"><span class="post-date">2026-09-27</span><div class="post-title">【諦めないで！】動かない車や古い事故車を最高値で買い取ってもらう攻略法</div></a>
+  <a href="post_20260926_005112.html" class="post-card"><span class="post-date">2026-09-26</span><div class="post-title">【2026年最新】軽自動車の買取相場と査定額をアップさせるコツ</div></a>
+  <a href="post_20260925_005115.html" class="post-card"><span class="post-date">2026-09-25</span><div class="post-title">【プロが教える】愛車を最高額で売るコツと失敗しないおすすめ一括査定サービス</div></a>
+  <a href="post_20260924_032720.html" class="post-card"><span class="post-date">2026-09-24</span><div class="post-title">【諦めないで！】動かない車や古い事故車を限界まで高く買い取ってもらう完全ガイド</div></a>
+  <a href="post_20260924_031120.html" class="post-card"><span class="post-date">2026-09-24</span><div class="post-title">走行距離10万キロ超えでも諦めない！愛車を高く売る完全攻略ガイド</div></a>
+  <a href="post_20260924_025738.html" class="post-card"><span class="post-date">2026-09-24</span><div class="post-title">【あきらめないで！】動かない車や古い事故車でも高く買い取ってもらう方法</div></a>
+  <a href="post_20260922_221329.html" class="post-card"><span class="post-date">2026-09-22</span><div class="post-title">【プロが教える】車の買い替えで10万円以上得する最適なタイミング5選</div></a>
+  <a href="post_20260922_004711.html" class="post-card"><span class="post-date">2026-09-22</span><div class="post-title">車査定のしつこい営業電話は回避できる！電話なし・スマートに愛車を高く売る裏ワザと対処法</div></a>
+  <a href="post_20260920_221307.html" class="post-card"><span class="post-date">2026-09-20</span><div class="post-title">【2024年最新】軽自動車の買取相場と査定額を10万円アップさせる7つの裏ワザ</div></a>
+  <a href="post_20260919_221247.html" class="post-card"><span class="post-date">2026-09-19</span><div class="post-title">走行距離10万キロ超えでも諦めない！愛車を1円でも高く売るための完全攻略ガイド</div></a>
+  <a href="post_20260919_141513.html" class="post-card"><span class="post-date">2026-09-19</span><div class="post-title">【知らなきゃ損】車の買い替えで10万円以上得する最適なタイミング5選！愛車を最高値で売るコツもプロが伝授</div></a>
+  <a href="about.html" class="post-card"><span class="post-date">最新記事</span><div class="post-title">運営者情報・プライバシーポリシー</div></a>
+  <a href="2024年最新初心者におすすめの軽自動車3選失敗しない選び方のポイントも解説.html" class="post-card"><span class="post-date">最新記事</span><div class="post-title">【2024年最新】初心者におすすめの軽自動車3選！失敗しない選び方のポイントも解説</div></a>
 </div>
 
 
     </main>
-    <footer>
-        &copy; Auto Tech Blog. All rights reserved.
-    </footer>
+    <footer>&copy; Auto Tech Blog. All rights reserved.</footer>
 </body>
 </html>

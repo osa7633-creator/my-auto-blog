@@ -6,17 +6,15 @@ import markdown
 os.makedirs("posts", exist_ok=True)
 md_files = glob.glob("posts/*.md")
 
-# ==========================================
-# ★ アフィリエイトURLの設定 ★
-# ==========================================
-AFFILIATE_URL_1 = "https://px.a8.net/svt/ejp?a8mat=4BCNG8+BMJR1U+4JVQ+5YZ77"
-AFFILIATE_URL_2 = "https://px.a8.net/svt/ejp?a8mat=4BCNG8+BMJR1U+4JVQ+5YZ77"
-AFFILIATE_URL_3 = "https://px.a8.net/svt/ejp?a8mat=4BCNG8+BMJR1U+4JVQ+5YZ77"
+AFFILIATE_URL = "https://px.a8.net/svt/ejp?a8mat=4BCNG8+BMJR1U+4JVQ+5YZ77"
 
-def get_btn_html(url, label):
-    if url.startswith("http"):
-        return f'<div style="text-align: center; margin: 24px 0;"><a href="{url}" target="_blank" rel="nofollow" style="background-color: #2563eb; color: #ffffff; font-weight: bold; padding: 14px 28px; border-radius: 8px; text-decoration: none; display: inline-block; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);">{label} &rarr;</a></div>'
-    return ""
+def make_button_box(title_text="頭金0円・月々定額で人気の新車に乗れる！"):
+    return f'''
+<div style="text-align: center; margin: 32px 0; padding: 24px; background-color: #f0f9ff; border: 2px solid #bae6fd; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
+    <div style="font-weight: bold; font-size: 1.1rem; color: #0369a1; margin-bottom: 12px;">【PR】{title_text}</div>
+    <a href="{AFFILIATE_URL}" target="_blank" rel="nofollow" style="background-color: #0284c7; color: #ffffff; font-weight: bold; font-size: 1.05rem; padding: 14px 28px; border-radius: 8px; text-decoration: none; display: inline-block;">オリコで乗ーる 公式サイトで詳しく見る &rarr;</a>
+</div>
+'''
 
 HTML_HEAD = """<!DOCTYPE html>
 <html lang="ja">
@@ -84,11 +82,6 @@ for file_path in md_files:
         if len(parts) >= 3:
             clean_text = parts[2].strip()
 
-    # 置換処理：プレースホルダーを「オリコで乗ーる」のボタンに変換
-    clean_text = clean_text.replace("[AFFILIATE_LINK_1]", get_btn_html(AFFILIATE_URL_1, "頭金0円・月々定額【オリコで乗ーる】詳細を見る"))
-    clean_text = clean_text.replace("[AFFILIATE_LINK_2]", get_btn_html(AFFILIATE_URL_2, "人気の新車カーリースプランをチェック"))
-    clean_text = clean_text.replace("[AFFILIATE_LINK_3]", get_btn_html(AFFILIATE_URL_3, "お得なカーリース見積もりはこちら"))
-
     lines = clean_text.splitlines()
     title = filename
     for line in lines:
@@ -96,17 +89,43 @@ for file_path in md_files:
             title = line.replace("# ", "").strip()
             break
 
+    # 見出し内の不要なタグを除去
+    clean_text = re.sub(r'(#+)\s*\[AFFILIATE_LINK_\d+\]\s*:?\s*', r'\1 ', clean_text)
+
+    html_content = markdown.markdown(clean_text, extensions=['fenced_code', 'tables'])
+
+    has_button = False
+    for i in range(1, 4):
+        tag = f"[AFFILIATE_LINK_{i}]"
+        if tag in html_content:
+            html_content = html_content.replace(tag, make_button_box())
+            has_button = True
+
+    # 記事ページ（about以外）なら確実にボタンを挿入
+    if filename != "about":
+        if not has_button:
+            if "</h2>" in html_content:
+                parts = html_content.split("</h2>", 1)
+                html_content = parts[0] + "</h2>\n" + make_button_box("おすすめの新車カーリース") + parts[1]
+            else:
+                html_content = make_button_box("おすすめの新車カーリース") + html_content
+
+        # 記事末尾にもボタンを追加（成約率向上）
+        html_content += make_button_box("頭金なし・月々定額で乗れる【オリコで乗ーる】")
+
     if filename.startswith("post_") and len(filename) >= 13:
         date_raw = filename.split("_")[1]
         date_str = f"{date_raw[:4]}-{date_raw[4:6]}-{date_raw[6:8]}" if len(date_raw) >= 8 else "最新記事"
+    elif filename == "about":
+        date_str = "固定ページ"
     else:
         date_str = "最新記事"
 
-    html_body = markdown.markdown(clean_text, extensions=['fenced_code', 'tables'])
+    if filename != "about":
+        posts_data.append({"title": title, "filename": f"{filename}.html", "date": date_str, "raw_filename": filename})
 
-    posts_data.append({"title": title, "filename": f"{filename}.html", "date": date_str, "raw_filename": filename})
+    article_html = f"{HTML_HEAD.replace('{{TITLE}}', title)}\n<a href='/' class='back-link'>&larr; 記事一覧へ戻る</a>\n<div class='article-container'>\n{html_content}\n</div>\n{HTML_FOOT}"
 
-    article_html = f"{HTML_HEAD.replace('{{TITLE}}', title)}\n<a href='/' class='back-link'>&larr; 記事一覧へ戻る</a>\n<div class='article-container'>\n{html_body}\n</div>\n{HTML_FOOT}"
     with open(f"{filename}.html", "w", encoding="utf-8") as f:
         f.write(article_html)
 
@@ -118,4 +137,4 @@ index_html = f"{HTML_HEAD.replace('{{TITLE}}', 'Auto Tech Blog')}\n{index_body}\
 with open("index.html", "w", encoding="utf-8") as f:
     f.write(index_html)
 
-print("Build completed with affiliate links.")
+print("Build completed successfully with guaranteed affiliate buttons.")

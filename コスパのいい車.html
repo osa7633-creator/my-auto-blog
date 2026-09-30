@@ -1,18 +1,9 @@
-import os
-import glob
-import markdown
-from datetime import datetime
-
-os.makedirs("posts", exist_ok=True)
-md_files = glob.glob("posts/*.md")
-
-# HTML共通テンプレート
-HTML_HEAD = """<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{TITLE}}</title>
+    <title>コスパのいい車：あなたの悩みを解消します！</title>
     <style>
         :root {
             --bg-color: #f8fafc;
@@ -177,68 +168,69 @@ HTML_HEAD = """<!DOCTYPE html>
         <a href="/">Auto Tech Blog</a>
     </header>
     <main>
-"""
 
-HTML_FOOT = """
+<a href="/" class="back-link">&larr; 記事一覧へ戻る</a>
+<div class="article-container">
+<hr />
+<p>title: "コスパのいい車 のおすすめ比較・解説"
+date: "2026-09-14"
+draft: false</p>
+<hr />
+<pre><code class="language-markdown"># コスパのいい車：あなたの悩みを解消します！
+
+## 1. 悩みに寄り添う導入
+
+車を購入する際、多くの人々が「コスパのいい車とは何か？」と疑問に思います。これは、車の価値、維持費、使用目的によって大きく異なるため、一概に答えを出すのは難しいです。この記事では、さまざまな角度から「コスパのいい車」を解説し、あなたの選択を支援します。
+
+## 2. おすすめアイテム3選
+
+### [AFFILIATE_LINK_1]：トヨタ カローラ アクチバ
+
+トヨタのカローラ アクチバは、安価で維持費が抑えられる一方で、安全装備も充実しています。燃費性能も優れているため、長期的に見ても費用対効果が高い車両です。
+
+### [AFFILIATE_LINK_2]：スズキ スイフト
+
+スズキ スイフトは小型車ですが、そのサイズを活かした使い勝手と、低燃費の特徴が魅力的です。また、車検や保険料も比較的安価であるため、トータルコストを抑えることができます。
+
+### [AFFILIATE_LINK_3]：マツダ CX-30
+
+マツダ CX-30は、スタイリッシュな外観と使いやすい内装が魅力的です。また、高い安全性能と良好な燃費を兼ね備えており、コスパの面でも優れています。維持費も考慮すると、非常にバランスの良い車両と言えるでしょう。
+
+## 3. 選ぶ際の注意点
+
+### 1. 用途と必要性
+
+車を購入する際の最初のステップは、自分の用途や必要性を明確にすることです。家族向けの移動用、通勤用、あるいは趣味としての自動車など、用途によって最適な車種は異なります。
+
+### 2. 燃費性能
+
+燃費性能は、長期的な維持費を大きく左右します。燃費の良い車を選ぶことで、燃料費の節約につながります。
+
+### 3. 安全装備
+
+安全装備は、事故時の危険を軽減する重要な要素です。最新の安全技術を搭載している車を選ぶことで、安心して運転できます。
+
+### 4. 保証やメンテナンス
+
+車の保証期間やメンテナンス費用は、車のライフサイクル全体で見ても大きな負担となります。購入前にこれらの点も考慮することが重要です。
+
+### 5. 価格とコスト
+
+車両価格だけでなく、車検、保険、維持費など、総合的なコストを考慮することが大切です。長期的な視点から最適な車を選びましょう。
+
+## 4. まとめ
+
+「コスパのいい車」を選ぶ際は、用途、燃費性能、安全装備、保証、そして総合的なコストを考慮することが重要です。おすすめの車種はありますが、最適な車はあなたのライフスタイルや必要性によって異なることを覚えておきましょう。上記のポイントを参考に、あなたに合ったコスパのいい車を選んでください。
+
+---
+注意：[AFFILIATE_LINK_1], [AFFILIATE_LINK_2], [AFFILIATE_LINK_3]はプレースホルダーであり、実際の記事作成時にはそれぞれのリンクが埋め込まれる形で表示されるべきです。
+</code></pre>
+<p>以上のMarkdown形式の文章が、指定されたキーワードについての比較解説記事になっています。SEOを考慮し、適切なキーワードが含まれています。具体的なリンクは、実際の記事作成時に埋め込まれる必要があります。</p>
+</div>
+
     </main>
     <footer>
         &copy; Auto Tech Blog. All rights reserved.
     </footer>
 </body>
 </html>
-"""
-
-posts_data = []
-
-for file_path in md_files:
-    filename = os.path.basename(file_path).replace(".md", "")
-    with open(file_path, "r", encoding="utf-8") as f:
-        md_text = f.read()
-
-    html_body = markdown.markdown(md_text, extensions=['fenced_code', 'tables'])
-    
-    lines = md_text.splitlines()
-    title = filename
-    for line in lines:
-        if line.startswith("# "):
-            title = line.replace("# ", "").strip()
-            break
-
-    try:
-        date_str = filename[:10]
-    except:
-        date_str = "Latest"
-
-    posts_data.append({
-        "title": title,
-        "filename": f"{filename}.html",
-        "date": date_str,
-        "raw_filename": filename
-    })
-
-    article_head = HTML_HEAD.replace("{{TITLE}}", title)
-    article_html = f"{article_head}\n"
-    article_html += '<a href="/" class="back-link">&larr; 記事一覧へ戻る</a>\n'
-    article_html += f'<div class="article-container">\n{html_body}\n</div>\n'
-    article_html += HTML_FOOT
-
-    with open(f"{filename}.html", "w", encoding="utf-8") as f:
-        f.write(article_html)
-
-posts_data.sort(key=lambda x: x["raw_filename"], reverse=True)
-
-index_body = '<div class="post-grid">\n'
-for post in posts_data:
-    index_body += f'''  <a href="{post['filename']}" class="post-card">
-    <span class="post-date">{post['date']}</span>
-    <div class="post-title">{post['title']}</div>
-  </a>\n'''
-index_body += '</div>\n'
-
-index_head = HTML_HEAD.replace("{{TITLE}}", "Auto Tech Blog")
-index_html = f"{index_head}\n{index_body}\n{HTML_FOOT}"
-
-with open("index.html", "w", encoding="utf-8") as f:
-    f.write(index_html)
-
-print("Build completed successfully.")

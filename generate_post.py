@@ -1,6 +1,7 @@
 import os
 import random
 import datetime
+import time
 from google import genai
 
 api_key = os.environ.get("GEMINI_API_KEY")
@@ -40,19 +41,28 @@ prompt = f"""
 
 print(f"記事生成中... テーマ: {theme}")
 
-try:
-    response = client.models.generate_content(
-        model='gemini-3.8-flash',
-        contents=prompt
-    )
-    content = response.text
+# サーバー混雑時の自動リトライ処理（最大3回）
+max_retries = 3
+for attempt in range(1, max_retries + 1):
+    try:
+        response = client.models.generate_content(
+            model='gemini-3.8-flash',
+            contents=prompt
+        )
+        content = response.text
 
-    os.makedirs("posts", exist_ok=True)
-    with open(filename, "w", encoding="utf-8") as f:
-        f.write(content)
+        os.makedirs("posts", exist_ok=True)
+        with open(filename, "w", encoding="utf-8") as f:
+            f.write(content)
 
-    print(f"記事の生成に成功しました: {filename}")
+        print(f"記事の生成に成功しました: {filename}")
+        break
 
-except Exception as e:
-    print(f"エラーが発生しました: {e}")
-    exit(1)
+    except Exception as e:
+        print(f"試行 {attempt}/{max_retries} でエラーが発生しました: {e}")
+        if attempt < max_retries:
+            print("10秒後に再試行します...")
+            time.sleep(10)
+        else:
+            print("再試行上限に達しました。")
+            exit(1)

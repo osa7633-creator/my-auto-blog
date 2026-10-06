@@ -1,17 +1,14 @@
 import os
 import random
 import datetime
-import google.generativeai as genai
+from google import genai
 
 api_key = os.environ.get("GEMINI_API_KEY")
 if not api_key:
     print("Error: GEMINI_API_KEY is not set.")
     exit(1)
 
-genai.configure(api_key=api_key)
-
-# 動作するモデル名に指定を変更
-model = genai.GenerativeModel('gemini-1.5-flash')
+client = genai.Client(api_key=api_key)
 
 THEMES = [
     "動かない車・年式が古い車を処分・買取してもらう方法",
@@ -44,7 +41,10 @@ prompt = f"""
 print(f"記事生成中... テーマ: {theme}")
 
 try:
-    response = model.generate_content(prompt)
+    response = client.models.generate_content(
+        model='gemini-2.5-flash',
+        contents=prompt
+    )
     content = response.text
 
     os.makedirs("posts", exist_ok=True)

@@ -42,7 +42,7 @@ print(f"記事生成中... テーマ: {theme}")
 
 try:
     response = client.models.generate_content(
-        model='gemini-2.5-flash',
+        model='gemini-3.8-flash',
         contents=prompt
     )
     content = response.text

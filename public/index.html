@@ -3,41 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>愛車買取・カーリース徹底ガイド</title>
+    <title>DRIVE & LEASE NAVI | 愛車買取・カーリース徹底ガイド</title>
     <style>
-        :root { --primary: #0066cc; --bg: #f4f6f9; --card-bg: #ffffff; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; background: var(--bg); color: #333; }
-        header { text-align: center; margin-bottom: 30px; padding: 20px 0; }
-        h1 { font-size: 2.2em; color: #111; margin-bottom: 10px; }
-        .subtitle { color: #666; font-size: 0.95em; }
+        :root { --primary: #e60012; --dark: #12151c; --bg: #0b0d12; --card-bg: #1c202b; }
+        body { font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", sans-serif; max-width: 960px; margin: 0 auto; padding: 0 15px 50px; background: var(--bg); color: #e0e0e0; }
         
-        /* 検索・ソートコントロール */
-        .controls { display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; }
-        .search-box { flex: 1; min-width: 200px; padding: 12px 16px; border: 1px solid #ccc; border-radius: 8px; font-size: 1em; outline: none; }
-        .search-box:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,102,204,0.1); }
-        .sort-select { padding: 12px 16px; border: 1px solid #ccc; border-radius: 8px; font-size: 1em; background: #fff; cursor: pointer; }
+        /* ヒーローヘッダー (モータースポーツ風) */
+        header { text-align: center; padding: 45px 20px 35px; background: linear-gradient(180deg, #1a1e29 0%, #0b0d12 100%); margin: 0 -15px 30px; border-bottom: 3px solid var(--primary); position: relative; overflow: hidden; }
+        header::before { content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: repeating-linear-gradient(45deg, rgba(230,0,18,0.03), rgba(230,0,18,0.03) 10px, transparent 10px, transparent 20px); pointer-events: none; }
+        .badge { display: inline-block; background: var(--primary); color: #fff; font-size: 0.8em; font-weight: 900; padding: 4px 12px; border-radius: 3px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; box-shadow: 0 0 10px rgba(230,0,18,0.5); }
+        h1 { font-size: 2.2em; color: #ffffff; margin: 0 0 10px; font-weight: 800; letter-spacing: 0.03em; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .subtitle { color: #a0a6b5; font-size: 0.95em; margin: 0; }
+        
+        /* コントロールエリア */
+        .controls { display: flex; gap: 15px; margin-bottom: 35px; flex-wrap: wrap; background: #161922; padding: 15px; border-radius: 10px; border: 1px solid #2a2f3e; }
+        .search-box { flex: 1; min-width: 220px; padding: 12px 18px; background: #0b0d12; border: 1px solid #3a4052; border-radius: 6px; font-size: 0.95em; color: #fff; outline: none; }
+        .search-box:focus { border-color: var(--primary); box-shadow: 0 0 8px rgba(230,0,18,0.3); }
+        .sort-select { padding: 12px 18px; background: #0b0d12; border: 1px solid #3a4052; border-radius: 6px; font-size: 0.95em; color: #fff; cursor: pointer; outline: none; }
 
-        /* グリッドレイアウト */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
-        .card { background: var(--card-bg); border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; color: inherit; display: flex; flex-direction: column; justify-content: space-between; }
-        .card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
-        .card-date { font-size: 0.85em; color: #888; margin-bottom: 8px; }
-        .card-title { font-size: 1.1em; font-weight: bold; line-height: 1.4; color: #1a1a1a; margin: 0 0 15px 0; }
-        .card-more { font-size: 0.9em; color: var(--primary); font-weight: bold; margin-top: auto; }
-        .no-results { text-align: center; color: #888; grid-column: 1 / -1; padding: 40px; }
+        /* メーター/レーシング風カードグリッド */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 22px; }
+        .card { background: var(--card-bg); border-radius: 10px; padding: 22px; border: 1px solid #2a2f3e; transition: all 0.3s ease; text-decoration: none; color: inherit; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
+        .card::before { content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: #3a4052; transition: 0.3s; }
+        .card:hover { transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 8px 25px rgba(230,0,18,0.25); }
+        .card:hover::before { background: var(--primary); }
+        .card-date { font-size: 0.8em; color: #e60012; font-weight: bold; margin-bottom: 10px; letter-spacing: 0.05em; }
+        .card-title { font-size: 1.1em; font-weight: 700; line-height: 1.5; color: #ffffff; margin: 0 0 18px; }
+        .card-more { font-size: 0.85em; color: #a0a6b5; font-weight: bold; margin-top: auto; display: flex; align-items: center; gap: 5px; }
+        .card:hover .card-more { color: var(--primary); }
+        .no-results { text-align: center; color: #888; grid-column: 1 / -1; padding: 50px; background: #161922; border-radius: 10px; }
     </style>
 </head>
 <body>
     <header>
-        <h1>愛車買取・カーリース徹底ガイド</h1>
-        <p class="subtitle">損しないクルマ選びとおすすめカーリースの比較情報サイト</p>
+        <span class="badge">AUTOMOBILE & LEASE</span>
+        <h1>DRIVE & LEASE NAVI</h1>
+        <p class="subtitle">損しないクルマ選び・カーリース徹底比較ガイド</p>
     </header>
 
     <div class="controls">
-        <input type="text" id="searchInput" class="search-box" placeholder="キーワードで記事を検索...">
+        <input type="text" id="searchInput" class="search-box" placeholder="🔍 車種名やキーワードで記事を検索...">
         <select id="sortSelect" class="sort-select">
-            <option value="newest">新しい順</option>
-            <option value="oldest">古い順</option>
+            <option value="newest">⏱️ 新しい順</option>
+            <option value="oldest">⌛ 古い順</option>
         </select>
     </div>
 
@@ -68,10 +76,10 @@
             postsGrid.innerHTML = filtered.map(post => `
                 <a href="${post.url}" class="card">
                     <div>
-                        <div class="card-date">${post.date}</div>
+                        <div class="card-date">DATE: ${post.date}</div>
                         <h2 class="card-title">${post.title}</h2>
                     </div>
-                    <div class="card-more">記事を読む →</div>
+                    <div class="card-more">READ MORE <span>→</span></div>
                 </a>
             `).join('');
         }
@@ -79,7 +87,6 @@
         searchInput.addEventListener('input', renderPosts);
         sortSelect.addEventListener('change', renderPosts);
 
-        // 初回レンダリング
         renderPosts();
     </script>
 </body>

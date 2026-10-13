@@ -10,10 +10,10 @@ SITE_URL = "https://my-auto-blog.pages.dev"
 
 AFFILIATE_URL = "https://px.a8.net/svt/ejp?a8mat=YOUR_AFFILIATE_ID"
 AFFILIATE_HTML = f"""
-<div style="text-align: center; margin: 40px 0; padding: 25px; background: linear-gradient(135deg, #fff5eb 0%, #ffe8d6 100%); border-radius: 12px; border: 2px solid #ff6b00; box-shadow: 0 4px 12px rgba(255,107,0,0.15);">
-    <p style="font-weight: bold; font-size: 1.25em; color: #d95300; margin-bottom: 15px; margin-top: 0;">＼ 月々定額・頭金なしで新車に乗れる！ ／</p>
-    <a href="{AFFILIATE_URL}" target="_blank" rel="nofollow noopener" style="display: inline-block; background-color: #ff6b00; color: #ffffff; padding: 16px 36px; font-size: 1.2em; font-weight: bold; text-decoration: none; border-radius: 50px; box-shadow: 0 4px 10px rgba(255,107,0,0.3); transition: transform 0.2s;">
-        オリコ「NORIKAE / ノール」の詳細を見る →
+<div style="text-align: center; margin: 40px 0; padding: 25px; background: linear-gradient(135deg, #1e222d 0%, #2a2f3d 100%); border-radius: 12px; border-left: 6px solid #e60012; box-shadow: 0 8px 20px rgba(0,0,0,0.3); color: #fff;">
+    <p style="font-weight: bold; font-size: 1.25em; color: #ff4d4d; margin-bottom: 15px; margin-top: 0; letter-spacing: 0.05em;">＼ 月々定額・頭金0円で話題の新車に乗れる！ ／</p>
+    <a href="{AFFILIATE_URL}" target="_blank" rel="nofollow noopener" style="display: inline-block; background: linear-gradient(90deg, #e60012 0%, #ff3300 100%); color: #ffffff; padding: 16px 36px; font-size: 1.15em; font-weight: 800; text-decoration: none; border-radius: 50px; box-shadow: 0 4px 15px rgba(230,0,18,0.4); transition: all 0.3s ease;">
+        オリコ「NORIKAE / ノール」の詳細を見る 🏎️💨
     </a>
 </div>
 """
@@ -28,7 +28,6 @@ for file_path in md_files:
     with open(file_path, "r", encoding="utf-8") as f:
         text = f.read()
 
-    # アフィリエイトリンク置換
     if "[AFFILIATE_LINK_1]" in text:
         text = text.replace("[AFFILIATE_LINK_1]", AFFILIATE_HTML)
     else:
@@ -36,7 +35,6 @@ for file_path in md_files:
 
     html_content = markdown.markdown(text)
     
-    # タイトルと日付の抽出
     lines = text.strip().split("\n")
     title = "無題の記事"
     for line in lines:
@@ -44,7 +42,6 @@ for file_path in md_files:
             title = line.replace("# ", "").strip()
             break
 
-    # ファイル名から日付（YYYYMMDD）を抽出（例: post_20261012_010233.md -> 2026-10-12）
     base_filename = os.path.basename(file_path)
     date_match = re.search(r'(\d{4})(\d{2})(\d{2})', base_filename)
     if date_match:
@@ -55,31 +52,32 @@ for file_path in md_files:
     base_name = base_filename.replace(".md", ".html")
     out_path = os.path.join(OUTPUT_DIR, base_name)
 
-    # 記事ページの出力
+    # 記事詳細ページ
     page_html = f"""<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{title} | 愛車買取・カーリース徹底ガイド</title>
+    <title>{title} | DRIVE & LEASE NAVI</title>
     <style>
-        :root {{ --primary: #0066cc; --bg: #f8f9fa; --text: #333; }}
-        body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 850px; margin: 0 auto; padding: 20px; color: var(--text); background: var(--bg); line-height: 1.8; }}
-        header {{ margin-bottom: 30px; text-align: center; }}
-        .nav-back {{ display: inline-block; padding: 8px 16px; background: #fff; border-radius: 20px; text-decoration: none; color: var(--primary); font-weight: bold; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }}
-        main {{ background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }}
-        .post-date {{ color: #777; font-size: 0.9em; margin-bottom: 20px; }}
-        h1 {{ color: #111; font-size: 1.8em; margin-top: 0; border-bottom: 2px solid var(--primary); padding-bottom: 10px; }}
-        h2 {{ color: #222; border-left: 4px solid var(--primary); padding-left: 10px; margin-top: 30px; }}
+        :root {{ --primary: #e60012; --dark: #12151c; --card-bg: #ffffff; --text: #2b2b2b; }}
+        body {{ font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", sans-serif; max-width: 900px; margin: 0 auto; padding: 0 15px 40px; color: var(--text); background: #f0f2f5; line-height: 1.8; }}
+        header {{ background: var(--dark); margin: 0 -15px 30px; padding: 20px; text-align: center; border-bottom: 3px solid var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.15); }}
+        .nav-back {{ display: inline-block; padding: 8px 20px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 30px; text-decoration: none; color: #fff; font-weight: bold; font-size: 0.9em; transition: 0.3s; }}
+        .nav-back:hover {{ background: var(--primary); border-color: var(--primary); }}
+        main {{ background: #fff; padding: 40px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); }}
+        .post-date {{ color: #e60012; font-weight: bold; font-size: 0.9em; margin-bottom: 15px; display: inline-block; background: #ffe6e6; padding: 2px 10px; border-radius: 4px; }}
+        h1 {{ color: #111; font-size: 1.8em; margin-top: 0; border-left: 6px solid var(--primary); padding-left: 15px; line-height: 1.4; }}
+        h2 {{ color: #111; background: #f8f9fa; padding: 10px 15px; border-left: 4px solid var(--primary); border-bottom: 1px solid #e9ecef; margin-top: 35px; font-size: 1.3em; }}
         img {{ max-width: 100%; height: auto; border-radius: 8px; }}
     </style>
 </head>
 <body>
     <header>
-        <a href="index.html" class="nav-back">← トップページへ戻る</a>
+        <a href="index.html" class="nav-back">🏎️ トップページへ戻る</a>
     </header>
     <main>
-        <div class="post-date">公開日: {date_str}</div>
+        <span class="post-date">DATE: {date_str}</span>
         {html_content}
     </main>
 </body>
@@ -95,52 +93,58 @@ for file_path in md_files:
     })
     urls.append(f"{SITE_URL}/{base_name}")
 
-# 日付順（新しい順）にデフォルトソート
 posts_data.sort(key=lambda x: x["date"], reverse=True)
-
-# トップページ (index.html) の生成
 posts_json = json.dumps(posts_data, ensure_ascii=False)
 
+# トップページ (車仕様デザイン)
 index_html = f"""<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>愛車買取・カーリース徹底ガイド</title>
+    <title>DRIVE & LEASE NAVI | 愛車買取・カーリース徹底ガイド</title>
     <style>
-        :root {{ --primary: #0066cc; --bg: #f4f6f9; --card-bg: #ffffff; }}
-        body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; background: var(--bg); color: #333; }}
-        header {{ text-align: center; margin-bottom: 30px; padding: 20px 0; }}
-        h1 {{ font-size: 2.2em; color: #111; margin-bottom: 10px; }}
-        .subtitle {{ color: #666; font-size: 0.95em; }}
+        :root {{ --primary: #e60012; --dark: #12151c; --bg: #0b0d12; --card-bg: #1c202b; }}
+        body {{ font-family: "Helvetica Neue", Arial, "Hiragino Kaku Gothic ProN", "Hiragino Sans", sans-serif; max-width: 960px; margin: 0 auto; padding: 0 15px 50px; background: var(--bg); color: #e0e0e0; }}
         
-        /* 検索・ソートコントロール */
-        .controls {{ display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; }}
-        .search-box {{ flex: 1; min-width: 200px; padding: 12px 16px; border: 1px solid #ccc; border-radius: 8px; font-size: 1em; outline: none; }}
-        .search-box:focus {{ border-color: var(--primary); box-shadow: 0 0 0 3px rgba(0,102,204,0.1); }}
-        .sort-select {{ padding: 12px 16px; border: 1px solid #ccc; border-radius: 8px; font-size: 1em; background: #fff; cursor: pointer; }}
+        /* ヒーローヘッダー (モータースポーツ風) */
+        header {{ text-align: center; padding: 45px 20px 35px; background: linear-gradient(180deg, #1a1e29 0%, #0b0d12 100%); margin: 0 -15px 30px; border-bottom: 3px solid var(--primary); position: relative; overflow: hidden; }}
+        header::before {{ content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: repeating-linear-gradient(45deg, rgba(230,0,18,0.03), rgba(230,0,18,0.03) 10px, transparent 10px, transparent 20px); pointer-events: none; }}
+        .badge {{ display: inline-block; background: var(--primary); color: #fff; font-size: 0.8em; font-weight: 900; padding: 4px 12px; border-radius: 3px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 10px; box-shadow: 0 0 10px rgba(230,0,18,0.5); }}
+        h1 {{ font-size: 2.2em; color: #ffffff; margin: 0 0 10px; font-weight: 800; letter-spacing: 0.03em; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }}
+        .subtitle {{ color: #a0a6b5; font-size: 0.95em; margin: 0; }}
+        
+        /* コントロールエリア */
+        .controls {{ display: flex; gap: 15px; margin-bottom: 35px; flex-wrap: wrap; background: #161922; padding: 15px; border-radius: 10px; border: 1px solid #2a2f3e; }}
+        .search-box {{ flex: 1; min-width: 220px; padding: 12px 18px; background: #0b0d12; border: 1px solid #3a4052; border-radius: 6px; font-size: 0.95em; color: #fff; outline: none; }}
+        .search-box:focus {{ border-color: var(--primary); box-shadow: 0 0 8px rgba(230,0,18,0.3); }}
+        .sort-select {{ padding: 12px 18px; background: #0b0d12; border: 1px solid #3a4052; border-radius: 6px; font-size: 0.95em; color: #fff; cursor: pointer; outline: none; }}
 
-        /* グリッドレイアウト */
-        .grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }}
-        .card {{ background: var(--card-bg); border-radius: 12px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: transform 0.2s, box-shadow 0.2s; text-decoration: none; color: inherit; display: flex; flex-direction: column; justify-content: space-between; }}
-        .card:hover {{ transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }}
-        .card-date {{ font-size: 0.85em; color: #888; margin-bottom: 8px; }}
-        .card-title {{ font-size: 1.1em; font-weight: bold; line-height: 1.4; color: #1a1a1a; margin: 0 0 15px 0; }}
-        .card-more {{ font-size: 0.9em; color: var(--primary); font-weight: bold; margin-top: auto; }}
-        .no-results {{ text-align: center; color: #888; grid-column: 1 / -1; padding: 40px; }}
+        /* メーター/レーシング風カードグリッド */
+        .grid {{ display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 22px; }}
+        .card {{ background: var(--card-bg); border-radius: 10px; padding: 22px; border: 1px solid #2a2f3e; transition: all 0.3s ease; text-decoration: none; color: inherit; display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }}
+        .card::before {{ content: ""; position: absolute; top: 0; left: 0; width: 4px; height: 100%; background: #3a4052; transition: 0.3s; }}
+        .card:hover {{ transform: translateY(-5px); border-color: var(--primary); box-shadow: 0 8px 25px rgba(230,0,18,0.25); }}
+        .card:hover::before {{ background: var(--primary); }}
+        .card-date {{ font-size: 0.8em; color: #e60012; font-weight: bold; margin-bottom: 10px; letter-spacing: 0.05em; }}
+        .card-title {{ font-size: 1.1em; font-weight: 700; line-height: 1.5; color: #ffffff; margin: 0 0 18px; }}
+        .card-more {{ font-size: 0.85em; color: #a0a6b5; font-weight: bold; margin-top: auto; display: flex; align-items: center; gap: 5px; }}
+        .card:hover .card-more {{ color: var(--primary); }}
+        .no-results {{ text-align: center; color: #888; grid-column: 1 / -1; padding: 50px; background: #161922; border-radius: 10px; }}
     </style>
 </head>
 <body>
     <header>
-        <h1>愛車買取・カーリース徹底ガイド</h1>
-        <p class="subtitle">損しないクルマ選びとおすすめカーリースの比較情報サイト</p>
+        <span class="badge">AUTOMOBILE & LEASE</span>
+        <h1>DRIVE & LEASE NAVI</h1>
+        <p class="subtitle">損しないクルマ選び・カーリース徹底比較ガイド</p>
     </header>
 
     <div class="controls">
-        <input type="text" id="searchInput" class="search-box" placeholder="キーワードで記事を検索...">
+        <input type="text" id="searchInput" class="search-box" placeholder="🔍 車種名やキーワードで記事を検索...">
         <select id="sortSelect" class="sort-select">
-            <option value="newest">新しい順</option>
-            <option value="oldest">古い順</option>
+            <option value="newest">⏱️ 新しい順</option>
+            <option value="oldest">⌛ 古い順</option>
         </select>
     </div>
 
@@ -171,10 +175,10 @@ index_html = f"""<!DOCTYPE html>
             postsGrid.innerHTML = filtered.map(post => `
                 <a href="${{post.url}}" class="card">
                     <div>
-                        <div class="card-date">${{post.date}}</div>
+                        <div class="card-date">DATE: ${{post.date}}</div>
                         <h2 class="card-title">${{post.title}}</h2>
                     </div>
-                    <div class="card-more">記事を読む →</div>
+                    <div class="card-more">READ MORE <span>→</span></div>
                 </a>
             `).join('');
         }}
@@ -182,7 +186,6 @@ index_html = f"""<!DOCTYPE html>
         searchInput.addEventListener('input', renderPosts);
         sortSelect.addEventListener('change', renderPosts);
 
-        // 初回レンダリング
         renderPosts();
     </script>
 </body>
@@ -191,7 +194,6 @@ index_html = f"""<!DOCTYPE html>
 with open(os.path.join(OUTPUT_DIR, "index.html"), "w", encoding="utf-8") as f:
     f.write(index_html)
 
-# sitemap.xml の更新
 sitemap_xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
 sitemap_xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
 for url in urls:
@@ -201,4 +203,4 @@ sitemap_xml += '</urlset>'
 with open(os.path.join(OUTPUT_DIR, "sitemap.xml"), "w", encoding="utf-8") as f:
     f.write(sitemap_xml)
 
-print("新デザイン・検索・ソート機能付きサイトの構築が完了しました。")
+print("モータースポーツ風・自動車特化デザインへのアップグレードが完了しました。")

@@ -1,39 +1,35 @@
-name: Auto Blog Post
+name: Auto Post and Build
 
 on:
   schedule:
-    # 毎日 日本時間 09:37（UTC 00:37）に実行
-    - cron: '37 0 * * *'
+    - cron: '0 0 * * *'
   workflow_dispatch:
 
 jobs:
-  build-and-post:
+  build:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
           python-version: '3.x'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install google-genai markdown
+          pip install markdown
 
-      - name: Run generation script
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-        run: python generate_post.py
-
-      - name: Build HTML
-        run: python build.py
+      - name: Run build script
+        run: |
+          python build.py
 
       - name: Commit and push changes
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
-          git add .
-          git diff --staged --quiet || (git commit -m "Auto-generated post" && git pull --rebase origin main && git push origin main)
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add public/
+          git commit -m "Auto-generate site using latest build.py" || exit 0
+          git push

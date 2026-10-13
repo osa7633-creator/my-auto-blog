@@ -195,4 +195,4 @@ sitemap_xml += '</urlset>'
 with open(os.path.join(OUTPUT_DIR, "sitemap.xml"), "w", encoding="utf-8") as f:
     f.write(sitemap_xml)
 
-print("build.py updated successfully.")
+print("Updated build.py successfully")
